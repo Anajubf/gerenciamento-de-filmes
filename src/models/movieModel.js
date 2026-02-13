@@ -1,7 +1,7 @@
 import prisma from '../utils/prismaClient.js';
 
 export const create = async (data) => {
-    return await prisma.filme.create({ data });
+    return await prisma.movie.create({ data });
 };
 
 export const findAll = async (filters = {}) => {
@@ -16,27 +16,27 @@ export const findAll = async (filters = {}) => {
     if (available !== undefined) where.available = available === true;
 
 
-    return await prisma.filme.findMany({
+    return await prisma.movie.findMany({
         where,
         orderBy: { createdAt: 'desc' },
     });
 };
 
 export const findById = async (id) => {
-    return await prisma.filme.findUnique({
+    return await prisma.movie.findUnique({
         where: { id: parseInt(id) },
     });
 };
 
 export const update = async (id, data) => {
-    return await prisma.filme.update({
+    return await prisma.movie.update({
         where: { id: parseInt(id) },
         data,
     });
 };
 
 export const remove = async (id) => {
-    return await prisma.filme.delete({
+    return await prisma.movie.delete({
         where: { id: parseInt(id) },
     });
 };

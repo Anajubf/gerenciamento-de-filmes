@@ -5,13 +5,13 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import pg from 'pg';
 
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
-const adapter = new PrismaPg(pool);
+const adapter = new PrismaPg();
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
     console.log('🌱 Iniciando seed...');
 
-    await prisma.filme.createMany({
+    await prisma.movie.createMany({
         data: [
             {
                 title: 'O Jogo da Imitação',

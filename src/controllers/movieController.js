@@ -44,7 +44,7 @@ if (title.length < 3)
 if (description.length < 10)
 	return res.status(400).json({ error:  `A descrição deve ter mais de dez caracteres!`});
 
-if (!Number.isInterger(duration) || duration <= 0)
+if (!Number.isInteger(duration) || duration <= 0)
 	return res.status(400).json({ error: `A duração deve ser um número inteiro positivo!`});
 
 if (duration > 300)
@@ -90,24 +90,11 @@ try {
   });
 }
 
-        
-        const data = await model.create({
-            title,
-            description,
-            duration,
-            genre,
-            rating,
-            available: true
-        });
 
-        res.status(201).json({
-            message: 'Registro cadastrado com sucesso!',
-            data,
-        });
-    } catch (error) {
-        console.error('Erro ao criar:', error);
-        res.status(500).json({ error: 'Erro interno no servidor ao salvar o registro.' });
-    }
+} catch (error) {
+    console.error('Erro ao criar:', error);
+    res.status(500).json({ error: 'Erro interno no servidor ao salvar o registro.' });
+}
 };
 
 export const getById = async (req, res) => {
@@ -144,6 +131,71 @@ export const update = async (req, res) => {
         const exists = await model.findById(id);
         if (!exists) {
             return res.status(404).json({ error: 'Registro não encontrado para atualizar.' });
+        }
+
+        if (exists.available === false) {
+            return res.status(400).json({
+                error: 'Filmes indisponíveis não podem ser atualizados.'
+            })
+        }
+
+        const { title, description, duration, genre, rating } = req.body;
+
+        if (rating !== undefined && (rating < 0 || 10)) {
+            return res.status(400).json({
+                error: 'A nota deve estar entre 0 e 10!'
+            })
+        }
+
+        if (duration !== undefined) {
+            if (!Number.isInteger(duration) || duration <= 0) {
+                return res.status(400).json({
+                    error: 'A duração deve ser um número positivo!'
+                })
+            }
+
+            if (duration > 300) {
+                return res.status(400).json({
+                    error: 'Filmes com duração superior a 300 minutos não podem ser cadastrados!'
+                })
+            }
+        }
+
+        if (title !== undefined && title.length < 3) {
+            return res.status(400).json({
+                error: 'O título deve conter mais de 3 caracteres!'
+            })
+        }
+
+        if (description !== undefined && description.length < 10) {
+            return res.status(400).json({
+                error: 'A descrição deve conter mais de 10 caracteres!'
+            })
+        }
+
+        const validGenre = [
+            'Drama',
+            'Comédia',
+            'Terror',
+            'Romance',
+            'Animação',
+            'Ficção Científica',
+            'Suspense',
+        ];
+
+        if (genre !== undefined && !validGenre.includes(genre)) {
+            return res.status(400).json({
+                error: 'Gênero inválido!'
+            })
+        }
+
+        if (title !== undefined && title !== exists.title) {
+            const existsTitle = await model.FindbyTitle(title);
+            if (existsTitle) {
+                return res.status(400).json({
+                    error: 'Já existe um filme com esse título'
+                })
+            }
         }
 
         const data = await model.update(id, req.body);
